@@ -17,6 +17,19 @@ class StrategyAgent:
         }
 
     def decide_action(self, belief: BeliefState) -> ActionPOPD:
+        top_state = belief.most_likely_state
+        top_prob = belief.probabilities.get(top_state, 0.0)
+
+        # --- RÈGLES DE SÉCURITÉ (Prioritaires) ---
+        
+        # 1. Si le client a acheté -> On ferme.
+        if top_state == "CONVERTED":
+            return ActionPOPD.CLOTURE
+            
+        # 2. Si le client est parti -> On attend (silence).
+        if top_state == "CHURNED":
+            return ActionPOPD.ATTENTE
+        
         actions = list(ActionPOPD)
         agg_q = {a.name: 0.0 for a in actions}
 

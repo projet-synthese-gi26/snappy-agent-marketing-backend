@@ -11,3 +11,4 @@ class ActionPOPD(Enum):
     GESTION_OBJECTION = "Répondre à une objection"
     EMPATHIE = "Montrer de l'empathie"
     ATTENTE = "Écouter / Saluer"
+    CLOTURE = "Remercier et fermer la conversation"

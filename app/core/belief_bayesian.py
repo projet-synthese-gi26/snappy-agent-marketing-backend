@@ -23,7 +23,17 @@ class BayesianBeliefTracker:
             "PRODUCT_AWARE": {"sentiment": (0.0, 0.3), "length": (8, 4), "intent": "QUESTION_PRIX"},
             "SKEPTICAL": {"sentiment": (-0.3, 0.3), "length": (12, 6), "intent": "OBJECTION"},
             "FULLY_AWARE": {"sentiment": (0.6, 0.3), "length": (5, 3), "intent": "CONFIRMATION"},
-            "CHURNED": {"sentiment": (-0.6, 0.4), "length": (4, 3), "intent": "OBJECTION"}
+            "CHURNED": {"sentiment": (-0.6, 0.4), "length": (4, 3), "intent": "OBJECTION"},
+            "CONVERTED": {"sentiment": (0.5, 0.5), "length": (4, 3), "intent": "CONFIRMATION"}
+        }
+        self.keyword_overrides = {
+            "CONVERTED": [
+                "c'est fait", "payé", "commandé", "achat effectué", 
+                "je viens d'acheter", "c'est bon", "done", "paiement validé"
+            ],
+            "CHURNED": [
+                "stop", "arrêtez", "pas intéressé", "non merci", "laissez tomber"
+            ]
         }
 
     def _init_transitions(self):
@@ -57,7 +67,20 @@ class BayesianBeliefTracker:
         p_i = 0.8 if feats['intent'] == exp['intent'] else 0.1
         return (p_s * p_l * p_i) + 1e-9
 
-    def update_belief(self, prior: np.ndarray, feats: Dict, last_action: Optional[ActionPOPD]) -> BeliefState:
+    def update_belief(self, prior: np.ndarray, feats: Dict, last_action: Optional[ActionPOPD], raw_text: str = "") -> BeliefState:
+        # 0. Override par mots-clés (La "Preuve")
+        # Si le client dit "J'ai payé", on ignore les probas floues, c'est du 100%
+        if raw_text:
+            text_lower = raw_text.lower()
+            for state_key, keywords in self.keyword_overrides.items():
+                if any(k in text_lower for k in keywords):
+                    # On force la distribution
+                    probs = {s: 0.01 for s in self.states} # Bruit de fond
+                    probs[state_key] = 0.99
+                    # Normalisation propre
+                    total = sum(probs.values())
+                    probs = {k: v/total for k, v in probs.items()}
+                    return BeliefState(probabilities=probs, most_likely_state=state_key)
         # 1. Transition (Prédiction)
         T = self.transition_tensor.get(last_action.name if last_action else "ATTENTE", np.eye(self.num_states))
         pred = prior @ T

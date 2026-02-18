@@ -10,6 +10,7 @@ class UserHiddenState(Enum):
     FULLY_AWARE = "Prêt à acheter"
     SKEPTICAL = "Doute / Objection"
     CHURNED = "Désintéressé / Parti"
+    CONVERTED = "Achat effectué / Succès confirmé"
 
 class BeliefState(BaseModel):
     probabilities: Dict[str, float]

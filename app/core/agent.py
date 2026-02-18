@@ -41,8 +41,13 @@ class MarketingAgent:
         
         # 2. Croyance (POMDP Update)
         prior_vec = get_belief(session_id)
-        current_belief = self.belief_tracker.update_belief(prior_vec, features, self.last_action)
-        
+        current_belief = self.belief_tracker.update_belief(
+            prior=prior_vec, 
+            feats=features, 
+            last_action=self.last_action,
+            raw_text=last_user_utterance 
+        )
+
         # Sauvegarde pour le tour suivant
         update_belief(session_id, np.array(list(current_belief.probabilities.values())))
         
