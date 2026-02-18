@@ -1,0 +1,7 @@
+Produit,Modèle,Success Rate (%),Avg Turns
+CryptoGuard Wallet,1. Random (Baseline),40.0,4.4
+CryptoGuard Wallet,2. Vanilla LLM (Baseline),100.0,1.2
+CryptoGuard Wallet,3. Ours (POMDP),100.0,2.4
+ZenMat,1. Random (Baseline),0.0,4.8
+ZenMat,2. Vanilla LLM (Baseline),100.0,1.4
+ZenMat,3. Ours (POMDP),100.0,3.4

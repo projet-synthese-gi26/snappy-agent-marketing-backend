@@ -1,0 +1,10 @@
+{
+    "name": "EcoHome Solar",
+    "category": "Énergie",
+    "description": "Panneaux solaires plug-and-play pour balcon.",
+    "target_audience": "Locataires urbains.",
+    "price": "699€",
+    "pain_points": ["Factures élevées", "Envie d'écologie", "Pas propriétaire"],
+    "benefits": ["Installation 5 min", "Économies immédiates", "Mobile"],
+    "unique_mechanism": "Micro-onduleur intelligent SunSync."
+  }
