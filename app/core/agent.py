@@ -8,7 +8,7 @@ from app.core.perception import PerceptionModule
 from app.core.belief_bayesian import BayesianBeliefTracker
 from app.core.strategy import StrategyAgent
 from app.core.generator import ContentGenerator
-from app.core.reward import RewardFunction # <--- Intégré
+from app.core.reward import RewardFunction 
 from app.models.product import ProductProfile
 from app.models.states import UserHiddenState, BeliefState
 from app.models.actions import ActionPOPD
@@ -24,12 +24,12 @@ class MarketingAgent:
         self.belief_tracker = BayesianBeliefTracker(list(UserHiddenState), list(ActionPOPD))
         self.strategy = StrategyAgent()
         self.generator = ContentGenerator(self.llm, self.product)
-        self.reward_func = RewardFunction() # <--- Nouveau
+        self.reward_func = RewardFunction()
         
         # Mémoire Volatile
         self.last_interaction_time = 0.0
         self.last_action = None
-        self.last_belief_state = None # Pour calculer le delta entropie
+        self.last_belief_state = None
 
     def process_turn_for_api(self, history_observation: str, last_user_utterance: str, 
                              belief_manager, session_id: str) -> dict:
@@ -51,7 +51,7 @@ class MarketingAgent:
         # Sauvegarde pour le tour suivant
         update_belief(session_id, np.array(list(current_belief.probabilities.values())))
         
-        # 3. Calcul de la Récompense (Scientific Logging)
+        # 3. Calcul de la Récompense
         current_reward = 0.0
         if self.last_belief_state and self.last_action:
             current_reward = self.reward_func.compute_reward(
@@ -74,28 +74,46 @@ class MarketingAgent:
             "reply": reply, 
             "action": action, 
             "belief": current_belief, 
-            "reward": current_reward # On renvoie le reward pour l'analyse
+            "reward": current_reward
         }
 
-    # Méthode simplifiée pour le benchmark
+    def process_listen_turn(self, last_user_utterance: str, belief_manager, session_id: str) -> dict:
+        """Mode LISTEN: Met à jour l'état de croyance SANS prendre de décision ni générer de texte."""
+        get_belief, update_belief = belief_manager
+        
+        # 1. Perception
+        features = self.perception.analyze(last_user_utterance, self.last_interaction_time)
+        self.last_interaction_time = time.time()
+        
+        # 2. Croyance (POMDP Update)
+        prior_vec = get_belief(session_id)
+        current_belief = self.belief_tracker.update_belief(
+            prior=prior_vec, 
+            feats=features, 
+            last_action=self.last_action,
+            raw_text=last_user_utterance 
+        )
+
+        # Sauvegarde pour le tour suivant
+        update_belief(session_id, np.array(list(current_belief.probabilities.values())))
+        
+        # Mise à jour mémoire
+        self.last_belief_state = current_belief
+        
+        return {"belief": current_belief}
+
     def act(self, history_observation: str) -> str:
         last_utt = history_observation.splitlines()[-1] if history_observation.strip() else ""
         feats = self.perception.analyze(last_utt, 0)
         
-        # Init simple pour benchmark
         if self.last_belief_state is None:
             self.last_belief_state = BeliefState(
                 probabilities=self.belief_tracker.update_belief(self.belief_tracker.get_initial_belief(), feats, None).probabilities,
                 most_likely_state="UNAWARE"
             )
 
-        # Update
         prior = np.array(list(self.last_belief_state.probabilities.values()))
         belief = self.belief_tracker.update_belief(prior, feats, self.last_action)
-        
-        # Reward calculation (optionnel ici mais possible)
-        # rew = self.reward_func.compute_reward(self.last_belief_state, self.last_action, belief)
-        
         self.last_belief_state = belief
         action = self.strategy.decide_action(belief)
         self.last_action = action

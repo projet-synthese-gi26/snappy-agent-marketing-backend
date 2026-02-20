@@ -15,3 +15,7 @@ class ChatResponse(BaseModel):
     action_taken: str
     belief_state: Dict[str, float] # On renvoie les probas pour le debug
     history: List[MessageItem]
+
+class ListenResponse(BaseModel):
+    status: str
+    belief_state: Dict[str, float]
