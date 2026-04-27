@@ -55,6 +55,21 @@ pip install -r requirements.txt
 # GROQ_API_KEY=votre_cle_api_groq
 ```
 
+### 🐳 Docker (Optionnel)
+
+Si vous préférez utiliser Docker, un `Dockerfile` est disponible.
+
+**1. Construire l'image :**
+```bash
+docker build -t snappy-backend .
+```
+
+**2. Lancer le conteneur :**
+Pensez à passer votre clé API Groq via une variable d'environnement.
+```bash
+docker run -p 8000:8000 -e GROQ_API_KEY=votre_cle_api_ici snappy-backend
+```
+
 ---
 
 ## 🚀 Démarrage
