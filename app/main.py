@@ -42,6 +42,12 @@ def update_session_belief_db(sid: str, vec: np.ndarray):
 
 # --- ENDPOINTS PRODUCTION ---
 
+@app.get("/healthcheck")
+async def health_check():
+    """Vérifie que l'API est opérationnelle."""
+    return {"status": "ok"}
+
+
 @app.get("/chat/{session_id}/history", response_model=list[MessageItem])
 async def get_history_endpoint(session_id: str):
     """Récupère l'historique. Retourne vide si la session n'existe pas."""

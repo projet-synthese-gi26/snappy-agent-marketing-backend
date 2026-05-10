@@ -3,14 +3,11 @@ import os
 from typing import List
 from groq import Groq
 import traceback
-from dotenv import load_dotenv
+from app.services.config import get_env_var
 
-load_dotenv()
 class GeminiService:
     def __init__(self):
-        api_key = os.getenv("GEMINI_API_KEY")
-        if not api_key:
-            raise ValueError("Clé API manquante dans .env")
+        api_key = get_env_var("GEMINI_API_KEY")
         
         genai.configure(api_key=api_key)
         self.model = genai.GenerativeModel("gemini-2.5-flash")
@@ -26,9 +23,7 @@ class GeminiService:
 class LLamaService():
     
     def __init__(self,  model_name="openai/gpt-oss-120b"):
-        api_key = os.getenv("GROQ_API_KEY")
-        if not api_key:
-            raise ValueError("API Key GROQ manquante.")
+        api_key = get_env_var("GROQ_API_KEY")
         
         try:
             self.model = model_name
