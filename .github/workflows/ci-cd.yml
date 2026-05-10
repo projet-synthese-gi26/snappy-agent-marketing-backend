@@ -1,0 +1,12 @@
+name: Snappy agent CI/CD
+
+on:
+  push:
+    branches:
+      - "**"
+jobs:
+  pipeline:
+    uses: projet-synthese-gi26/workflows/.github/workflows/django-ci-cd-v2.yml@main
+    with:
+      app_name: snappy-agent
+    secrets: inherit
